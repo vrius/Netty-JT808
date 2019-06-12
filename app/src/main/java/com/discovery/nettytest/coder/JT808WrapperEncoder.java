@@ -114,20 +114,6 @@ public class JT808WrapperEncoder extends MessageToMessageEncoder<PackageData> {
 
         /**
          * 这里我们对消息体属性进行封装，也是整个808协议比较难封装的一部分
-         *
-         * 1、消息长度:0000000100000000 & 0000001111111111 => 0000000100000000
-         *
-         * 2、设置加密方式:encryp，按照JT808协议定义可以暂时设置1和0两个,由于其描述的bit有3位，所以我们可以使用到的值最大是7，这里我们用1，标识RSA加密
-         *      -encryp<<10 => 0000001000000000
-         *      -0000000100000000 | 0000010000000000 => 0000010100000000
-         *
-         * 3、是否分包:0000010100000000 | 0010000000000000 => 0010010100000000 （只有当totalPkg大于1的时候才需要封装分包信息）
-         *
-         * 4、使用消息属性中预留的第15个bit设置消息来源,这里假设source为1
-         *     -source << 15 => 0100000000000000
-         *     -0010010100000000 | 0100000000000000 => 0110010100000000
-         *
-         * 5、整理：老实说，我并不知道bodyAttr &= 0x7FFF这个操作有什么用，但是我还是怎么做了（或许是去除最前面的bit）
          */
         short bodyAttr = (short) (bodyLen & 0x03FF);
         bodyAttr |= (encryp << 10);
@@ -136,15 +122,10 @@ public class JT808WrapperEncoder extends MessageToMessageEncoder<PackageData> {
         bodyAttr &= 0x7FFF;
         byteBuf.writeShort(bodyAttr);
 
-        //设置六个字节设备标识
+
         byteBuf.writeBytes(target);
-        //消息两个字节流水号
         byteBuf.writeShort(msgNum);
-
-        //总包数
         byteBuf.writeByte(totalPkg & 0x000000FF);
-
-        //包序号
         byteBuf.writeByte(pkgNum & 0x000000FF);
 
         //计算写入位置，并封装消息体

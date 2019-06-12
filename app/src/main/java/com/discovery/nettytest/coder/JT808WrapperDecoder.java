@@ -34,10 +34,6 @@ public class JT808WrapperDecoder extends ByteToMessageDecoder {
          * 此处我们通过与运算对消息体属性进行解析：
          * 具体消息体属性的解析方式需参看数据的封装方式见
          * {@link JT808WrapperEncoder}
-         * 1、body长度 取最后10个bit：0x03FF => 0000001111111111
-         * 2、加密类型 取第11、12、13个bit：0x1C00 => 0001110000000000
-         * 3、是否分包 取第14个bit：0x2000 => 0010000000000000
-         * 4、消息来源 取第15个bit：0x4000 => 0100000000000000
          */
         short bodyLen = (short) (bodyAttr & 0x03FF);
         short encryp = (short) ((bodyAttr & 0x1C00) >> 10);
